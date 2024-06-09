@@ -1,0 +1,63 @@
+/* src/components/dashboard/Dashboard.css */
+
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .sidebar {
+    width: 25%;
+    background-color: #343a40;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .sidebar h3 {
+    margin-bottom: 20px;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+  }
+  
+  .sidebar ul li {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    display: block;
+    background-color: #495057;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .sidebar ul li button{
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    display: block;
+    width: 100%;
+    background-color: #495057;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .sidebar ul li a:hover,
+  .sidebar ul li button:hover {
+    background-color: #adb5bd;
+  }
+  
+  .main-content {
+    width: 75%;
+    padding: 20px;
+  }
+  

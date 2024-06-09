@@ -1,0 +1,57 @@
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.login-section {
+    background-color: #6a6565;
+    color: white;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-section h2 {
+    margin-bottom: 20px;
+}
+
+.login-section .input-group {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.login-section .input-group label {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.login-section .input-group input {
+    width: 300px;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.login-section button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.login-section button:hover {
+    background-color: #0056b3;
+}
+
+.image-section {
+    flex: 1;
+    background: url('https://cdn.wallpapersafari.com/61/35/bYuHsK.jpg') no-repeat center center;
+    background-size: cover;
+}
