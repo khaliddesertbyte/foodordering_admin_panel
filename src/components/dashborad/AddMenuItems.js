@@ -9,6 +9,7 @@ const AddMenuItems = () => {
   const [itemName, setItemName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [category, setCategory] = useState('All');
   const [menuItems, setMenuItems] = useState([]);
@@ -48,22 +49,22 @@ const AddMenuItems = () => {
       return;
     }
 
-    let imageUrl = '';
-    if (imageFile) {
-      const imageRef = ref(storage, `images/${imageFile.name}`);
-      const snapshot = await uploadBytes(imageRef, imageFile);
-      imageUrl = await getDownloadURL(snapshot.ref);
-    }
-
-    const newItem = {
-      itemName,
-      price,
-      description,
-      image: imageUrl,
-      category
-    };
-
     try {
+      let newImageUrl = imageUrl;
+      if (imageFile) {
+        const imageRef = ref(storage, `images/${imageFile.name}`);
+        const snapshot = await uploadBytes(imageRef, imageFile);
+        newImageUrl = await getDownloadURL(snapshot.ref);
+      }
+
+      const newItem = {
+        itemName,
+        price,
+        description,
+        image: newImageUrl,
+        category
+      };
+
       if (editItemId) {
         const itemDoc = doc(firestore, 'menuItems', editItemId);
         await updateDoc(itemDoc, newItem);
@@ -89,7 +90,7 @@ const AddMenuItems = () => {
     setItemName(item.itemName);
     setPrice(item.price);
     setDescription(item.description);
-    setImageFile(null); // Clear the image file when editing
+    setImageUrl(item.image); // Set imageUrl state for editing
     setCategory(item.category);
     setShowForm(true);
     setEditItemId(item.id);
@@ -183,7 +184,13 @@ const AddMenuItems = () => {
               <td>{item.itemName}</td>
               <td>QAR {item.price}</td>
               <td>{item.description}</td>
-              <td><img src={item.image} alt={item.itemName} className="item-image" /></td>
+              <td>
+  {item.image ? (
+    <img src={item.image} alt={item.itemName} className="item-image" />
+  ) : (
+    <span className="image-placeholder">No Image Available</span>
+  )}
+</td>
               <td>
                 <button className="edit-button" onClick={() => handleEdit(item)}>Edit</button>
                 <button className="delete-button" onClick={() => handleDeleteConfirm(item.id)}>Delete</button>

@@ -1,0 +1,41 @@
+.orders-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .orders-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .orders-table th, .orders-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .orders-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .order-item-image {
+    max-width: 50px;
+  }
+  
+  .orders-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .orders-li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .orders-ul orders-li  div:first-child {
+    margin-right: 10px;
+  }
+  
