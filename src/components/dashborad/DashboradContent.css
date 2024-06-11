@@ -1,0 +1,35 @@
+.dashboard-container-content {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .dashboard-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  
+  .stat-item {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px;
+    width: 150px;
+    height: 150px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .stat-item h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #333;
+  }
+  
+  .stat-item p {
+    margin: 10px 0 0;
+    font-size: 1.5em;
+    color: #007bff;
+  }
+  

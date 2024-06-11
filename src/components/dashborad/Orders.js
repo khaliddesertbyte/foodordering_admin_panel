@@ -11,6 +11,8 @@ const Orders = () => {
   const [showEditModal, setShowEditModal] = useState(false); // State to control edit modal
   const [editOrder, setEditOrder] = useState(null); // State to store the order being edited
   const [editedItems, setEditedItems] = useState([]); // State to store edited items
+  const [editedPrices, setEditedPrices] = useState([]); // State to store edited prices
+
 
   useEffect(() => {
     fetchOrders();
@@ -20,6 +22,8 @@ const Orders = () => {
     try {
       const querySnapshot = await getDocs(collection(firestore, 'orders'));
       const ordersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Sort orders by order date (assuming `date` is the field containing the order date)
+     ordersData.sort((a, b) => new Date(b.date) - new Date(a.date));
       setOrders(ordersData);
       console.log('Fetched orders:', ordersData);
     } catch (error) {
@@ -50,47 +54,40 @@ const Orders = () => {
   };
 
   const handleDeleteOrder = async (orderId) => {
-    // Set the order id to be canceled
     setCancelOrderId(orderId);
-    // Show the cancel confirmation modal
     setShowCancelModal(true);
   };
 
-  const handleConfirmCancelOrder = async () => {
+  const handleConfirmDeleteOrder = async () => {
     try {
-      // Update the status of the order to "Cancelled"
-      await updateDoc(doc(firestore, 'orders', cancelOrderId), {
-        status: 'Cancelled'
-      });
-      console.log('Order cancelled successfully');
-      // Close the cancel confirmation modal
+      await deleteDoc(doc(firestore, 'orders', cancelOrderId));
+      console.log('Order deleted successfully');
       setShowCancelModal(false);
-      // Refresh orders after cancellation
       fetchOrders();
     } catch (error) {
-      console.error('Error cancelling order:', error);
+      console.error('Error deleting order:', error);
     }
   };
 
   const handleEditOrder = (order) => {
-    // Set the order being edited
     setEditOrder(order);
-    // Initialize editedItems with the order's items
     setEditedItems(order.items.map(item => ({ ...item })));
-    // Show the edit modal
+    setEditedPrices(order.items.map(item => item.price)); // Initialize editedPrices with current prices
     setShowEditModal(true);
   };
 
   const handleUpdateOrder = async () => {
     try {
-      // Update the order with the edited items
+      const updatedItems = editedItems.map((item, index) => ({
+        ...item,
+        price: editedPrices[index],
+      }));
+  
       await updateDoc(doc(firestore, 'orders', editOrder.id), {
-        items: editedItems
+        items: updatedItems,
       });
       console.log('Order updated successfully');
-      // Close the edit modal
       setShowEditModal(false);
-      // Refresh orders after update
       fetchOrders();
     } catch (error) {
       console.error('Error updating order:', error);
@@ -151,7 +148,7 @@ const Orders = () => {
               <td>{order.status}</td>
               <td>
                 <div className='action-button'>
-              <button onClick={() => handleDeleteOrder(order.id)} className='cancel-order'>Cancel Order</button>
+              <button onClick={() => handleDeleteOrder(order.id)} className='cancel-order'>Delete Order</button>
               <button onClick={() => handleEditOrder(order)} className='edit-order'>Edit Order</button>
               </div>
               </td>
@@ -213,7 +210,7 @@ const Orders = () => {
             <h4>Confirm Cancel</h4>
             <p>Are you sure you want to cancel this order?</p>
             <div className="modal-buttons">
-              <button className="confirm-cancel-button" onClick={handleConfirmCancelOrder}>Confirm Cancel Order</button>
+              <button className="confirm-cancel-button" onClick={handleConfirmDeleteOrder}>Confirm Delete Order</button>
               <button className="cancel-button" onClick={() => setShowCancelModal(false)}>Cancel</button>
             </div>
           </div>
@@ -226,23 +223,39 @@ const Orders = () => {
           <div className="modal-content">
             <h4>Edit Order</h4>
             <div className="order-items">
-              {editedItems.map((item, index) => (
-                <div key={index}>
-                  <p>Item: {item.name}</p>
-                  <p>Price: ${item.price}</p>
-                  <label>Quantity:</label>
-                  <input
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      const newItems = [...editedItems];
-                      newItems[index].quantity = value;
-                      setEditedItems(newItems);
-                    }}
-                  />
-                </div>
-              ))}
+            {editedItems.map((item, index) => (
+  <div key={index}>
+    <p>Item: {item.name}</p>
+    <label>Price:</label>
+    <input
+      type="number"
+      value={editedPrices[index]}
+      onChange={(e) => {
+        const newPrices = [...editedPrices];
+        newPrices[index] = parseFloat(e.target.value);
+        setEditedPrices(newPrices);
+      }}
+    />
+    <label>Quantity:</label>
+    <input
+      type="number"
+      value={item.quantity}
+      onChange={(e) => {
+        const newQuantity = parseInt(e.target.value);
+        const newItems = [...editedItems];
+        newItems[index].quantity = newQuantity;
+        setEditedItems(newItems);
+
+        // Calculate the new price based on the updated quantity and original price
+        const originalPrice = editOrder.items[index].price/ editOrder.items[index].quantity; // Get the original price from the editOrder object
+        const newPrice = newQuantity * originalPrice;
+        const newPrices = [...editedPrices];
+        newPrices[index] = newPrice.toFixed(2); // Round the price to 2 decimal places
+        setEditedPrices(newPrices);
+      }}
+    />
+  </div>
+))}
             </div>
             <button className="update-order-button" onClick={handleUpdateOrder}>Update Order</button>
             <button className="cancel-button" onClick={() => setShowEditModal(false)}>Cancel</button>

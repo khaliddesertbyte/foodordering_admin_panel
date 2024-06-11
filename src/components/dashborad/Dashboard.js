@@ -7,6 +7,7 @@ import Orders from './Orders';
 import Customers from './Customers';
 import './Dashboard.css';
 import { auth } from '../../firebase';
+import DashboardContent from './DashboradContent';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const Dashboard = () => {
       </div>
       <div className="main-content">
         <Routes>
-          <Route path="/" element={<div>Welcome to the Dashboard</div>} />
+          <Route path="/" element={<DashboardContent/>} />
           <Route path="add-menu-items" element={<AddMenuItems />} />
           <Route path="orders" element={<Orders />} />
           <Route path="customers" element={<Customers />} />
