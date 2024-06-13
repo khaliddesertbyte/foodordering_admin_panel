@@ -53,23 +53,6 @@ const Orders = () => {
     printWindow.print();
   };
 
-
-  // const handleStatusUpdate = async (orderId, newStatus) => {
-  //   const confirmUpdate = window.confirm(`Are you sure you want to update the status of order to ${newStatus}?`);
-  
-  //   if (confirmUpdate) {
-  //     try {
-  //       await updateDoc(doc(firestore, 'orders', orderId), {
-  //         status: newStatus
-  //       });
-  //       console.log('Order status updated successfully');
-  //       // You may want to refresh the orders list after updating status
-  //       fetchOrders();
-  //     } catch (error) {
-  //       console.error('Error updating order status:', error);
-  //     }
-  //   }
-  // };
   
   // to handle the status of the order 
   const handleStatusUpdate = async (orderId, newStatus) => {
@@ -197,8 +180,8 @@ const Orders = () => {
                 >
                   <option value="Pending">Pending</option>
                   <option value="Processing">Processing</option>
-                  <option value="Processing">Packaging</option>
-                  <option value="Processing">Out For Delivery</option>
+                  <option value="Packaging">Packaging</option>
+                  <option value="Out For Delivery">Out For Delivery</option>
                   <option value="Completed">Completed</option>
                   <option value="Canceled">Canceled</option>
                 </select>
