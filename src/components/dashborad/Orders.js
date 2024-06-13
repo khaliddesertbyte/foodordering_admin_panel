@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { firestore } from '../../firebase';
-import { collection, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import { collection, getDocs, updateDoc, doc, deleteDoc,onSnapshot } from 'firebase/firestore';
 import './Orders.css';
 
+const MySwal = withReactContent(Swal);
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const printRefs = useRef([]);
@@ -12,20 +15,30 @@ const Orders = () => {
   const [editOrder, setEditOrder] = useState(null); // State to store the order being edited
   const [editedItems, setEditedItems] = useState([]); // State to store edited items
   const [editedPrices, setEditedPrices] = useState([]); // State to store edited prices
+  const [showModal, setShowModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  
 
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
+ 
+
+ 
   const fetchOrders = async () => {
     try {
-      const querySnapshot = await getDocs(collection(firestore, 'orders'));
-      const ordersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Sort orders by order date (assuming `date` is the field containing the order date)
-     ordersData.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setOrders(ordersData);
-      console.log('Fetched orders:', ordersData);
+      const unsubscribe = onSnapshot(collection(firestore, 'orders'), (querySnapshot) => {
+        const ordersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Sort orders by order date (assuming `date` is the field containing the order date)
+        ordersData.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setOrders(ordersData);
+        console.log('Fetched orders:', ordersData);
+      });
+  
+      // Clean up the listener when the component unmounts
+      return () => unsubscribe();
     } catch (error) {
       console.error('Error fetching orders:', error);
     }
@@ -40,17 +53,48 @@ const Orders = () => {
     printWindow.print();
   };
 
+
+  // const handleStatusUpdate = async (orderId, newStatus) => {
+  //   const confirmUpdate = window.confirm(`Are you sure you want to update the status of order to ${newStatus}?`);
+  
+  //   if (confirmUpdate) {
+  //     try {
+  //       await updateDoc(doc(firestore, 'orders', orderId), {
+  //         status: newStatus
+  //       });
+  //       console.log('Order status updated successfully');
+  //       // You may want to refresh the orders list after updating status
+  //       fetchOrders();
+  //     } catch (error) {
+  //       console.error('Error updating order status:', error);
+  //     }
+  //   }
+  // };
+  
+  // to handle the status of the order 
   const handleStatusUpdate = async (orderId, newStatus) => {
-    try {
-      await updateDoc(doc(firestore, 'orders', orderId), {
-        status: newStatus
-      });
-      console.log('Order status updated successfully');
-      // You may want to refresh the orders list after updating status
-      fetchOrders();
-    } catch (error) {
-      console.error('Error updating order status:', error);
-    }
+    MySwal.fire({
+      title: 'Confirm to submit',
+      text: `Are you sure you want to update the status of the order to ${newStatus}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await updateDoc(doc(firestore, 'orders', orderId), {
+            status: newStatus
+          });
+          console.log('Order status updated successfully');
+          fetchOrders();
+        } catch (error) {
+          console.error('Error updating order status:', error);
+        }
+      } else {
+        console.log('Update cancelled');
+      }
+    });
   };
 
   const handleDeleteOrder = async (orderId) => {
@@ -145,7 +189,21 @@ const Orders = () => {
               </td>
               <td>{order.phonenumber}</td>
               <td>{order.date}</td>
-              <td>{order.status}</td>
+              <td>
+                <p>{order.status}</p>
+                <select
+                  value={order.status}
+                  onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Processing">Processing</option>
+                  <option value="Processing">Packaging</option>
+                  <option value="Processing">Out For Delivery</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Canceled">Canceled</option>
+                </select>
+                
+              </td>
               <td>
                 <div className='action-button'>
               <button onClick={() => handleDeleteOrder(order.id)} className='cancel-order'>Delete Order</button>
@@ -203,6 +261,28 @@ const Orders = () => {
           ))}
         </tbody>
       </table>
+      {/* {showModal && (
+  <div className="modal">
+    <div className="modal-content">
+      <h2>Update Order Status</h2>
+      <select
+        value={selectedOrder.status}
+        onChange={(e) =>
+          handleStatusUpdate(selectedOrder.id, e.target.value)
+        }
+      >
+        <option value="Pending">Pending</option>
+        <option value="Processing">Processing</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+      <div className="modal-button" style={{marginTop:"20px",padding:"10px"}} >
+      <button onClick={() => setShowModal(false)} style={{marginRight:"20px"}}>Update Status</button>
+      <button onClick={() => setShowModal(false)}>Close</button>
+      </div>
+    </div>
+  </div>
+)} */}
     {/* Cancel order confirmation modal */}
       {showCancelModal && (
         <div className="modal">

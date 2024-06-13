@@ -26,7 +26,7 @@ const DashboardContent = () => {
       const customersData = customersSnapshot.docs.map(doc => doc.data());
 
       const totalOrdersCount = ordersData.length;
-      const totalCanceledOrdersCount = ordersData.filter(order => order.status === 'Cancelled').length;
+      const totalCanceledOrdersCount = ordersData.filter(order => order.status === 'Canceled').length;
       const totalSalesAmount = ordersData.reduce((acc, order) => {
         const itemsTotal = order.items ? order.items.reduce((itemAcc, item) => {
           // Convert item.price to number if it's a string
