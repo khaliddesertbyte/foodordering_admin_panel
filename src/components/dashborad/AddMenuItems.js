@@ -18,6 +18,9 @@ const AddMenuItems = () => {
   const [editItemId, setEditItemId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState(null);
+  const [showTopDishConfirm, setShowTopDishConfirm] = useState(false);
+  const [topDishItemId, setTopDishItemId] = useState(null);
+  const [isAddingToTopDishes, setIsAddingToTopDishes] = useState(true);
 
   useEffect(() => {
     const auth = getAuth();
@@ -62,7 +65,8 @@ const AddMenuItems = () => {
         price,
         description,
         image: newImageUrl,
-        category
+        category,
+        topDish: false // Default value for new items
       };
 
       if (editItemId) {
@@ -114,6 +118,24 @@ const AddMenuItems = () => {
 
   const handleCategoryClick = (category) => {
     setCategory(category);
+  };
+
+  const handleToggleTopDishes = (itemId, isAdding) => {
+    setTopDishItemId(itemId);
+    setIsAddingToTopDishes(isAdding);
+    setShowTopDishConfirm(true);
+  };
+
+  const confirmToggleTopDishes = async () => {
+    try {
+      const itemDoc = doc(firestore, 'menuItems', topDishItemId);
+      await updateDoc(itemDoc, { topDish: isAddingToTopDishes });
+      setMenuItems(menuItems.map(item => item.id === topDishItemId ? { ...item, topDish: isAddingToTopDishes } : item));
+      setShowTopDishConfirm(false);
+      setTopDishItemId(null);
+    } catch (error) {
+      console.error("Error toggling top dishes status: ", error);
+    }
   };
 
   const filteredItems = category === 'All' ? menuItems : menuItems.filter(item => item.category === category);
@@ -174,6 +196,7 @@ const AddMenuItems = () => {
             <th>Price</th>
             <th>Description</th>
             <th>Image</th>
+            <th>Top Dishes</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -185,15 +208,23 @@ const AddMenuItems = () => {
               <td>QAR {item.price}</td>
               <td>{item.description}</td>
               <td>
-  {item.image ? (
-    <img src={item.image} alt={item.itemName} className="item-image" />
-  ) : (
-    <span className="image-placeholder">No Image Available</span>
-  )}
-</td>
+                {item.image ? (
+                  <img src={item.image} alt={item.itemName} className="item-image" />
+                ) : (
+                  <span className="image-placeholder">No Image Available</span>
+                )}
+              </td>
               <td>
-                <button className="edit-button" onClick={() => handleEdit(item)}>Edit</button>
-                <button className="delete-button" onClick={() => handleDeleteConfirm(item.id)}>Delete</button>
+                {item.topDish ? "This item is added as top dish" : "This item is not added as top dish"}
+              </td>
+              <td className="action-buttons">
+                <div className="edit-delete-buttons">
+                  <button className="edit-button" onClick={() => handleEdit(item)}>Edit</button>
+                  <button className="delete-button" onClick={() => handleDeleteConfirm(item.id)}>Delete</button>
+                </div>
+                <button className="top-dish-button" onClick={() => handleToggleTopDishes(item.id, !item.topDish)}>
+                  {item.topDish ? "Remove from Top Dishes" : "Add to Top Dishes"}
+                </button>
               </td>
             </tr>
           ))}
@@ -206,6 +237,18 @@ const AddMenuItems = () => {
             <p>Are you sure you want to delete this item?</p>
             <button className="confirm-delete-button" onClick={handleDelete}>Confirm Delete</button>
             <button className="cancel-button" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+      {showTopDishConfirm && (
+        <div className="modal">
+          <div className="modal-content">
+            <h4>Confirm {isAddingToTopDishes ? 'Add to' : 'Remove from'} Top Dishes</h4>
+            <p>Are you sure you want to {isAddingToTopDishes ? 'add this item to' : 'remove this item from'} top dishes?</p>
+            <button className="confirm-top-dish-button" onClick={confirmToggleTopDishes}>
+              Confirm
+            </button>
+            <button className="cancel-button" onClick={() => setShowTopDishConfirm(false)}>Cancel</button>
           </div>
         </div>
       )}
